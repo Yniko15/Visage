@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<!--
+  index.html — The Shell
+  ──────────────────────
+  This file's only job is STRUCTURE.
+  It does not style anything (that's style.css).
+  It does not do any logic (that's the .js files).
+  Think of it like the skeleton of a body —
+  it just defines what exists and where.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <!-- CONTENT SECURITY POLICY ─────────────────────────────────
+       Tells the browser which domains are allowed to load resources.
+       If an attacker somehow injects a script pointing to evil.com,
+       the browser will refuse to load it.  -->
+  <meta http-equiv="Content-Security-Policy"
+    content="
+      default-src 'self';
+      script-src  'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://sdk.scdn.co;
+      connect-src 'self' https://api.spotify.com https://accounts.spotify.com https://cdn.jsdelivr.net;
+      frame-src   'self' https://sdk.scdn.co https://accounts.spotify.com;
+      img-src     'self' https://i.scdn.co https://mosaic.scdn.co https://image-cdn-ak.spotifycdn.com https://image-cdn-fa.spotifycdn.com data: blob:;
+      style-src   'self' https://fonts.googleapis.com 'unsafe-inline';
+      font-src    'self' https://fonts.gstatic.com;
+      media-src   blob:;
+      worker-src  blob:;
+    ">
+
+  <!-- This line makes the page scale correctly on all screen sizes -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VISAGE</title>
+
+  <!-- EXTERNAL FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- MEDIAPIPE LIBRARIES -->
+  <!-- These are the computer vision libraries that power face + hand detection.
+       "crossorigin" means: allow this file to be loaded from a different domain (cdn.jsdelivr.net) -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+
+  <!-- OUR STYLESHEET -->
+  <!-- "rel=stylesheet" tells the browser this link is a CSS file, not a regular link -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Spotify button styles now in style.css -->
+</head>
+<body>
+
+  <!-- ── HEADER ─────────────────────────────────────── -->
+  <header>
+    <!-- The app name -->
+    <div class="wordmark">Visage</div>
+    <!-- Camera toggle button. "onclick" calls a function we define in player.js -->
+    <div style="display:flex;align-items:center;gap:8px">
+    <button class="spotify-btn" id="spotify-btn" onclick="loginWithSpotify()">LINK SPOTIFY</button>
+    <button class="logout-btn" id="logout-btn" onclick="logoutSpotify()" style="display:none">LOGOUT</button>
+    <button class="cam-btn" id="cam-btn" onclick="toggleCamera()">START SCAN</button>
+  </div>
+  </header>
+
+  <!-- ── MAIN CONTENT ───────────────────────────────── -->
+  <!--
+    "main" is split into two columns:
+    Left  = the music player
+    Right = the camera feed + emotion readout
+  -->
+  <main>
+
+    <!-- LEFT: PLAYER -->
+    <div class="player-side" id="player-side">
+
+      <!-- This div changes color based on detected mood.
+           It sits behind everything else (see style.css for how) -->
+      <div class="mood-wash" id="mood-wash"></div>
+
+      <!-- When a gesture is detected, this briefly flashes an arrow on screen -->
+      <div class="gesture-flash" id="gesture-flash"></div>
+
+      <!-- ALBUM ART -->
+      <div class="album" id="album">
+        <!-- ASCII symbol representing the current song -->
+        <span id="album-emoji" style="font-family:'Syne Mono',monospace;font-size:32px;color:var(--dim)">[ > ]</span>
+        <!-- Small badge that appears when a song is queued by mood detection -->
+        <div class="queued-badge" id="queued-badge">QUEUED</div>
+      </div>
+
+      <!-- SONG TITLE + ARTIST -->
+      <div class="song-info">
+        <div class="song-title" id="song-title">NO TRACK LOADED</div>
+        <div class="song-artist" id="song-artist">—</div>
+      </div>
+
+      <!-- TIMELINE (progress bar) -->
+      <div class="timeline-wrap">
+        <!-- Current time on the left, total duration on the right -->
+        <div class="timeline-times">
+          <span id="t-current">0:00</span>
+          <span id="t-total">0:00</span>
+        </div>
+        <!-- The actual bar. Clicking it seeks to that position (see player.js seekClick) -->
+        <div class="timeline-track" id="timeline" onclick="seekClick(event)">
+          <!-- This div grows from 0% to 100% width as the song plays -->
+          <div class="timeline-fill" id="t-fill"></div>
+          <!-- A colored marker showing where the "peak" of the song is -->
+          <div class="peak-marker" id="peak-marker"></div>
+        </div>
+      </div>
+
+      <!-- PLAYBACK CONTROLS -->
+      <div class="controls">
+        <button class="ctrl" onclick="prevSong()">⏮</button>
+        <button class="ctrl play-ctrl" id="play-btn" onclick="togglePlay()">▶</button>
+        <button class="ctrl" onclick="nextSong()">⏭</button>
+      </div>
+
+    </div><!-- end .player-side -->
+
+    <!-- RIGHT: CAMERA -->
+    <div class="camera-side">
+
+      <!-- The camera video feed lives here -->
+      <div class="cam-feed">
+        <!-- The actual webcam stream. "muted" prevents audio feedback. "playsinline" is needed on iOS. -->
+        <video id="video" autoplay muted playsinline></video>
+        <!-- We draw the hand skeleton on top of the video using this canvas -->
+        <canvas id="hand-canvas"></canvas>
+        <!-- This placeholder shows when camera is off -->
+        <div class="cam-placeholder" id="cam-placeholder">
+          <div class="cam-placeholder-icon" style="font-family:'Syne Mono',monospace;font-size:24px">[CAM]</div>
+          <div class="cam-placeholder-text">SCAN OFF<br>Press start to begin</div>
+        </div>
+      </div>
+
+      <!-- EMOTION READOUT -->
+      <div class="emotion-panel">
+        <div class="emotion-label">Live signals</div>
+        <!-- This div gets filled dynamically by face-engine.js -->
+        <div class="emotions" id="emotions"></div>
+        <!-- Current mood summary row -->
+        <div class="mood-row">
+          <div class="mood-emoji" id="mood-emoji">[—]</div>
+        <div class="mood-text">
+            <div class="mood-detected" id="mood-detected">STANDBY</div>
+            <div class="mood-sub" id="mood-sub">Start scan to detect</div>
+          </div>
+          <!-- Small text that appears when a song is queued -->
+          <div class="queued-hint" id="queued-hint">UP NEXT ›</div>
+        </div>
+      </div>
+
+    </div><!-- end .camera-side -->
+
+  </main>
+
+  <!-- ── FOOTER ──────────────────────────────────────── -->
+  <!-- Just a reference guide for the hand gestures -->
+  <footer>
+    <div class="gesture-guide">
+      <div class="g-item"><span class="g-icon">[<]</span> SWIPE LEFT = BACK</div>
+      <div class="g-item"><span class="g-icon">[>]</span> SWIPE RIGHT = FORWARD</div>
+      <div class="g-item"><span class="g-icon">[||]</span> OPEN PALM = PAUSE</div>
+    </div>
+  </footer>
+
+  <!-- A small popup that confirms what gesture was just detected -->
+  <div class="gesture-toast" id="gesture-toast"></div>
+
+  <!-- ── OUR JAVASCRIPT FILES ───────────────────────── -->
+  <!--
+    ORDER MATTERS here. Each file can only use things defined in files loaded before it.
+    songs.js must come first because player.js needs the song data.
+    face-engine.js and hand-engine.js must come before player.js
+    because player.js calls functions from both of them.
+  -->
+  <script src="config.js"></script>
+  <script src="spotify.js"></script>
+  <script src="songs.js"></script>
+  <script src="onboarding.js"></script>
+  <script src="face-engine.js"></script>
+  <script src="hand-engine.js"></script>
+  <script src="player.js"></script>
+
+</body>
+</html>

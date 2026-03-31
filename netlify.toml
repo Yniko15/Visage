@@ -1,0 +1,9 @@
+# netlify.toml — Netlify deployment configuration
+# ─────────────────────────────────────────────────
+# "command" runs BEFORE Netlify publishes the site.
+# "publish" tells Netlify which folder contains the final files.
+# Since this is a flat project (no dist/ folder), we publish ".".
+
+[build]
+  command = "node build.js"
+  publish = "."

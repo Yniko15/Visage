@@ -1,0 +1,682 @@
+/*
+  style.css — All Visual Styling
+  ────────────────────────────────
+  VISAGE — Warm beige, ASCII aesthetic
+  Mood-reactive color palette on a cream canvas.
+*/
+
+
+/* ── DESIGN TOKENS ──────────────────────────────────────── */
+:root {
+  --bg:      #F5F0E8;          /* warm cream/beige */
+  --bg2:     #EDE8DF;          /* slightly darker cream */
+  --card:    #E8E2D8;          /* card surface */
+  --line:    rgba(42,37,32,0.10);
+  --text:    #2a2520;
+  --dim:     rgba(42,37,32,0.50);
+  --dim2:    rgba(42,37,32,0.30);
+
+  /* Brand accent — sage green (default state) */
+  --accent:  #7a8c6e;
+  --accent2: #5c6b52;
+  --glow:    rgba(122,140,110,0.18);
+
+  /* Emotion colors — each mood has its own accent */
+  --happy:   #e8a838;          /* warm amber */
+  --sad:     #6b8cae;          /* dusty blue */
+  --angry:   #c4453a;          /* warm red */
+  --neutral: #7a8c6e;          /* sage green */
+  --calm:    #9b8eb0;          /* soft lavender */
+
+  --peak:    #7a8c6e;
+  --queued:  #9b8eb0;
+}
+
+
+/* ── RESET ──────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Space Mono', monospace !important;
+}
+
+
+/* ── ROOT LAYOUT ────────────────────────────────────────── */
+body {
+  background:
+    radial-gradient(1200px 600px at 14% 18%, rgba(122,140,110,0.08), transparent 60%),
+    radial-gradient(900px 520px at 72% 28%, rgba(155,142,176,0.06), transparent 62%),
+    var(--bg);
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  user-select: none;
+  animation: visage-boot 0.8s ease-out;
+}
+
+@keyframes visage-boot {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+::selection { background: rgba(122,140,110,0.22); }
+
+
+/* ── HEADER ─────────────────────────────────────────────── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px 14px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(245,240,232,0.65);
+  backdrop-filter: blur(12px);
+  animation: slide-down 0.6s ease-out 0.15s both;
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.wordmark {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 10px;
+  text-transform: uppercase;
+  position: relative;
+  color: var(--text);
+}
+
+/* ASCII decorative bracket */
+.wordmark::before {
+  content: "[ ";
+  opacity: 0.3;
+  letter-spacing: 0;
+}
+.wordmark::after {
+  content: " ]";
+  opacity: 0.3;
+  letter-spacing: 0;
+}
+
+
+/* ── BUTTONS ────────────────────────────────────────────── */
+.cam-btn {
+  background: rgba(42,37,32,0.04);
+  border: 1px solid var(--line);
+  color: var(--dim);
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  padding: 7px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color .2s, color .2s, background .2s, transform .12s;
+}
+.cam-btn:hover,
+.cam-btn.active {
+  background: rgba(42,37,32,0.08);
+  border-color: rgba(42,37,32,0.25);
+  color: var(--text);
+}
+.cam-btn:active { transform: translateY(1px); }
+
+.spotify-btn {
+  background: rgba(122,140,110,0.08);
+  border: 1px solid rgba(122,140,110,0.30);
+  color: var(--accent2);
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  padding: 7px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background .2s, color .2s, border-color .2s, transform .12s;
+}
+.spotify-btn:hover {
+  background: rgba(122,140,110,0.14);
+  border-color: rgba(122,140,110,0.50);
+}
+.spotify-btn.connected {
+  background: rgba(122,140,110,0.18);
+  border-color: rgba(122,140,110,0.55);
+  color: var(--text);
+}
+.spotify-btn:active { transform: translateY(1px); }
+
+.logout-btn {
+  background: rgba(196,69,58,0.06);
+  border: 1px solid rgba(196,69,58,0.20);
+  color: rgba(196,69,58,0.65);
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  padding: 7px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background .2s, color .2s, border-color .2s, transform .12s;
+}
+.logout-btn:hover {
+  background: rgba(196,69,58,0.12);
+  border-color: rgba(196,69,58,0.40);
+  color: #c4453a;
+}
+.logout-btn:active { transform: translateY(1px); }
+
+
+/* ── MAIN LAYOUT ────────────────────────────────────────── */
+main {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  overflow: hidden;
+}
+
+
+/* ── PLAYER SIDE (left column) ──────────────────────────── */
+.player-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 32px;
+  border-right: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+  animation: slide-up 0.7s ease-out 0.3s both;
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ASCII corner decorations */
+.player-side::before {
+  content: "┌─────────────────────────────────────────┐";
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  right: 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  color: rgba(42,37,32,0.08);
+  letter-spacing: 1px;
+  pointer-events: none;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.player-side::after {
+  content: "└─────────────────────────────────────────┘";
+  position: absolute;
+  bottom: 12px;
+  left: 16px;
+  right: 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  color: rgba(42,37,32,0.08);
+  letter-spacing: 1px;
+  pointer-events: none;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* Mood-tinted wash overlay */
+.mood-wash {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.2s, background 1.2s;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Stack content above mood-wash */
+.album,
+.song-info,
+.timeline-wrap,
+.controls {
+  position: relative;
+  z-index: 1;
+}
+
+
+/* ── ALBUM ART ──────────────────────────────────────────── */
+.album {
+  width: 160px;
+  height: 160px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+  background: linear-gradient(180deg, rgba(42,37,32,0.03), rgba(42,37,32,0.06));
+  border: 1px solid var(--line);
+  box-shadow:
+    0 16px 50px rgba(42,37,32,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.5);
+  transition: background .8s, border-color .8s;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* ASCII scanline effect on album */
+.album::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(42,37,32,0.015) 3px,
+    rgba(42,37,32,0.015) 4px
+  );
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.queued-badge {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(122,140,110,0.14);
+  border: 1px solid rgba(122,140,110,0.30);
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity .3s;
+}
+.queued-badge.show { opacity: 1; }
+
+
+/* ── SONG INFO ──────────────────────────────────────────── */
+.song-info { text-align: center; }
+
+.song-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  line-height: 1.1;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.song-artist {
+  font-size: 12px;
+  color: var(--dim);
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 1px;
+}
+
+
+/* ── TIMELINE ───────────────────────────────────────────── */
+.timeline-wrap {
+  width: 100%;
+  max-width: 380px;
+}
+
+.timeline-times {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--dim2);
+  margin-bottom: 8px;
+}
+
+.timeline-track {
+  height: 3px;
+  background: rgba(42,37,32,0.10);
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+}
+
+.timeline-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--text), var(--accent));
+  border-radius: 2px;
+  width: 0%;
+  transition: width .4s linear;
+  pointer-events: none;
+}
+
+.peak-marker {
+  position: absolute;
+  top: -3px;
+  height: 9px;
+  background: linear-gradient(90deg, rgba(122,140,110,0.12), rgba(122,140,110,0.35));
+  opacity: 0.9;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+
+/* ── CONTROLS ───────────────────────────────────────────── */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.ctrl {
+  background: rgba(42,37,32,0.03);
+  border: 1px solid var(--line);
+  color: var(--dim);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color .15s, color .15s, background .15s, transform .1s;
+}
+.ctrl:hover {
+  border-color: rgba(42,37,32,0.25);
+  background: rgba(42,37,32,0.06);
+  color: var(--text);
+}
+.ctrl:active { transform: scale(.92); }
+
+.play-ctrl {
+  width: 54px;
+  height: 54px;
+  font-size: 20px;
+  border-color: rgba(122,140,110,0.45);
+  color: var(--text);
+  box-shadow: 0 10px 34px rgba(42,37,32,0.10), 0 0 0 1px rgba(122,140,110,0.12) inset;
+}
+
+
+/* ── GESTURE FLASH ──────────────────────────────────────── */
+.gesture-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .08s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  z-index: 2;
+  color: var(--dim);
+  font-family: 'Space Mono', monospace;
+}
+.gesture-flash.show { opacity: 1; }
+
+
+/* ── CAMERA SIDE (right column) ─────────────────────────── */
+.camera-side {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(237,232,223,0.55);
+  animation: slide-in-right 0.6s ease-out 0.4s both;
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.cam-feed {
+  position: relative;
+  flex: 1;
+  background: var(--bg2);
+  overflow: hidden;
+  min-height: 0;
+}
+
+#video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+  display: block;
+  opacity: 0;
+  transition: opacity .5s;
+}
+#video.on { opacity: 1; }
+
+#hand-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(-1);
+  pointer-events: none;
+}
+
+.cam-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--dim);
+}
+.cam-placeholder.hidden { display: none; }
+
+.cam-placeholder-icon {
+  font-size: 36px;
+  opacity: .3;
+}
+.cam-placeholder-text {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-align: center;
+  line-height: 1.8;
+  color: var(--dim);
+}
+
+
+/* ── EMOTION PANEL ──────────────────────────────────────── */
+.emotion-panel {
+  border-top: 1px solid var(--line);
+  padding: 16px 20px;
+  flex-shrink: 0;
+  background: rgba(245,240,232,0.55);
+  backdrop-filter: blur(12px);
+}
+
+.emotion-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--accent2);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.emotions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.e-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Mood-specific ASCII decorators ─────────────────────── */
+/* Each mood gets a unique monospace symbol before its name */
+.e-name {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  width: 72px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  color: var(--dim);
+  transition: color .3s;
+}
+.e-name.dominant { color: var(--text); font-weight: 700; }
+
+/* We prepend ASCII symbols via data attributes + ::before */
+.e-name::before {
+  display: inline-block;
+  width: 18px;
+  font-size: 8px;
+  opacity: 0.5;
+  margin-right: 2px;
+}
+.e-name.dominant::before { opacity: 1; }
+
+/* Happy  → .*. (sun/star burst) */
+#en-happy::before  { content: ".*."; }
+
+/* Sad    → ~.~ (tears/waves) */
+#en-sad::before    { content: "~.~"; }
+
+/* Angry  → /!\ (warning triangle) */
+#en-angry::before  { content: "/!\\"; }
+
+/* Neutral → -.- (flat line, zen) */
+#en-neutral::before { content: "-.-"; }
+
+/* Calm   → ~~~ (gentle waves) */
+#en-calm::before   { content: "~~~"; }
+
+.e-bar-bg {
+  flex: 1;
+  height: 2px;
+  background: rgba(42,37,32,0.10);
+  border-radius: 1px;
+}
+
+.e-bar-fill {
+  height: 100%;
+  border-radius: 1px;
+  width: 0%;
+  transition: width .5s ease;
+}
+
+.e-val {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--dim2);
+  width: 28px;
+  text-align: right;
+}
+
+
+/* ── MOOD ROW ───────────────────────────────────────────── */
+.mood-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.mood-emoji {
+  font-size: 16px;
+  font-family: 'Space Mono', monospace;
+  width: 28px;
+  text-align: center;
+}
+.mood-text { flex: 1; }
+
+.mood-detected {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.mood-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--dim);
+  margin-top: 2px;
+}
+
+.queued-hint {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--accent2);
+  letter-spacing: 1px;
+  text-align: right;
+  opacity: 0;
+  transition: opacity .4s;
+}
+.queued-hint.show { opacity: 1; }
+
+
+/* ── FOOTER ─────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--line);
+  padding: 10px 28px;
+  display: flex;
+  align-items: center;
+  background: rgba(245,240,232,0.55);
+  backdrop-filter: blur(12px);
+}
+
+.gesture-guide { display: flex; gap: 20px; }
+
+.g-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--dim);
+  letter-spacing: 1px;
+}
+
+.g-icon {
+  font-size: 11px;
+  font-family: 'Space Mono', monospace;
+}
+
+
+/* ── GESTURE TOAST ──────────────────────────────────────── */
+.gesture-toast {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: rgba(245,240,232,0.95);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text);
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+  pointer-events: none;
+  z-index: 100;
+  box-shadow: 0 8px 32px rgba(42,37,32,0.10);
+}
+.gesture-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
