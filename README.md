@@ -2,7 +2,7 @@
 
 A browser-based music player that reads your facial expressions and hand gestures in real time, then switches your Spotify playlist to match your detected mood.
 
-Built as a personal portfolio project. No frameworks, no build tools — plain HTML, CSS, and JavaScript.
+Built as a personal portfolio project. Note that I used AI to troubleshoot, run, and change the code during the creation of this project.
 
 ---
 
